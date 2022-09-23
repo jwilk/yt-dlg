@@ -60,7 +60,8 @@ class Terminal(Vte.Terminal):
         )
 
 def excepthook(exctype, value, tb):
-    sys.excepthook = None
+    sys.excepthook = sys.__excepthook__
+    sys.excepthook(exctype, value, tb)
     def callback():
         tb_text = str.join('', traceback.format_exception(exctype, value, tb))
         dlg = Gtk.MessageDialog(
