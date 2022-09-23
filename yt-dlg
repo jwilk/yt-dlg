@@ -49,9 +49,9 @@ class Terminal(Vte.Terminal):
         text = data.get_text()
         if not re.match('^https?://', text):
             return
-        cmd = ['yt-dlp', '--', text]
         self.disconnect_by_func(self.on_drag_data_received)
         self.feed(b'\33[H\33[J\33[?25h')
+        cmd = ['yt-dlp', '--', text]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT,
             get_dl_dir(),
