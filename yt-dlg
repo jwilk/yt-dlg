@@ -72,7 +72,6 @@ def excepthook(exctype, value, tb):
     tb_text = str.join('', traceback.format_exception(exctype, value, tb))
     dlg = Gtk.MessageDialog(
         modal=True,
-        destroy_with_parent=True,
         message_type=Gtk.MessageType.ERROR,
         buttons=Gtk.ButtonsType.CLOSE,
         title=f'{prog} — fatal error',
