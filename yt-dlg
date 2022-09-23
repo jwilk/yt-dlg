@@ -29,9 +29,14 @@ class Window(Gtk.Window):
 
     def __init__(self):
         super().__init__(title=prog)
+        hbox = Gtk.HBox()
         self.term = Terminal()
-        self.add(self.term)
         self.term.drag_dest_add_text_targets()
+        hbox.pack_start(self.term, True, True, 0)
+        scrollbar = Gtk.VScrollbar()
+        scrollbar.set_adjustment(self.term.get_vadjustment())
+        hbox.pack_start(scrollbar, False, True, 0)
+        self.add(hbox)
         self.connect('destroy', Gtk.main_quit)
 
 def get_dl_dir():
