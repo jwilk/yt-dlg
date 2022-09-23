@@ -69,19 +69,17 @@ class Terminal(Vte.Terminal):
 def excepthook(exctype, value, tb):
     sys.excepthook = sys.__excepthook__
     sys.excepthook(exctype, value, tb)
-    def callback():
-        tb_text = str.join('', traceback.format_exception(exctype, value, tb))
-        dlg = Gtk.MessageDialog(
-            modal=True,
-            destroy_with_parent=True,
-            message_type=Gtk.MessageType.ERROR,
-            buttons=Gtk.ButtonsType.CLOSE,
-            title=f'{prog} — fatal error',
-            text=tb_text,
-        )
-        dlg.run()
-        Gtk.main_quit()
-    GLib.idle_add(callback)
+    tb_text = str.join('', traceback.format_exception(exctype, value, tb))
+    dlg = Gtk.MessageDialog(
+        modal=True,
+        destroy_with_parent=True,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.CLOSE,
+        title=f'{prog} — fatal error',
+        text=tb_text,
+    )
+    dlg.run()
+    Gtk.main_quit()
 
 def main():
     sys.excepthook = excepthook
