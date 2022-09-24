@@ -42,21 +42,30 @@ class Window(Gtk.Window):
 def get_dl_dir():
     return GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD)
 
+def is_url(text):
+    return re.match('^https?://', text) is not None
+
 class Terminal(Vte.Terminal):
 
     def __init__(self):
         super().__init__()
+        self.url = None
         self.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self.connect('drag-data-received', self.on_drag_data_received)
         self.feed(b'[drag & drop URL here]\33[?25l')
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
-        text = data.get_text()
-        if not re.match('^https?://', text):
+        if self.url is not None:
             return
-        self.disconnect_by_func(self.on_drag_data_received)
+        text = data.get_text()
+        if not is_url(text):
+            return
+        self.recv_url(text)
+
+    def recv_url(self, url):
+        self.url = url
         self.feed(b'\33[H\33[J\33[?25h')
-        cmd = ['yt-dlp', '--', text]
+        cmd = ['yt-dlp', '--', self.url]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT,
             get_dl_dir(),
