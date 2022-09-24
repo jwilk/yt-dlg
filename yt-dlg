@@ -55,13 +55,15 @@ def is_url(text):
 
 class Terminal(Vte.Terminal):
 
+    prompt = b'[drag & drop URL here; or paste URL with Ctrl-V]\33[?25l'
+
     def __init__(self):
         super().__init__()
         self.url = None
         self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self.connect('drag-data-received', self.on_drag_data_received)
-        self.feed(b'[drag & drop URL here; or paste URL with Ctrl-V]\33[?25l')
+        self.feed(self.prompt)
 
     def on_accel(self, group, window, key, mod):
         if self.url is not None:
