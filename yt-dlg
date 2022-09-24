@@ -37,6 +37,14 @@ class Window(Gtk.Window):
         scrollbar.set_adjustment(self.term.get_vadjustment())
         hbox.pack_start(scrollbar, False, True, 0)
         self.add(hbox)
+        accel = Gtk.AccelGroup()
+        accel.connect(
+            Gdk.keyval_from_name('v'),
+            Gdk.ModifierType.CONTROL_MASK,
+            0,
+            self.term.on_accel
+        )
+        self.add_accel_group(accel)
         self.connect('destroy', Gtk.main_quit)
 
 def get_dl_dir():
@@ -50,9 +58,20 @@ class Terminal(Vte.Terminal):
     def __init__(self):
         super().__init__()
         self.url = None
+        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self.connect('drag-data-received', self.on_drag_data_received)
-        self.feed(b'[drag & drop URL here]\33[?25l')
+        self.feed(b'[drag & drop URL here; or paste URL with Ctrl-V]\33[?25l')
+
+    def on_accel(self, group, window, key, mod):
+        if self.url is not None:
+            return
+        assert key == Gdk.keyval_from_name('v')
+        assert mod == Gdk.ModifierType.CONTROL_MASK
+        text = self.clipboard.wait_for_text()
+        if not is_url(text):
+            return
+        self.recv_url(text)
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
         if self.url is not None:
