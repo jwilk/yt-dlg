@@ -63,6 +63,7 @@ class Terminal(Vte.Terminal):
         self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self.connect('drag-data-received', self.on_drag_data_received)
+        self.connect('child-exited', self.on_child_exited)
         self.feed(self.prompt)
 
     def on_accel(self, group, window, key, mod):
@@ -95,6 +96,11 @@ class Terminal(Vte.Terminal):
             GLib.SpawnFlags.DEFAULT,
             None, None, -1, None
         )
+
+    def on_child_exited(self, widget, exit_status):
+        self.feed(b'\r\n')
+        self.feed(self.prompt)
+        self.url = None
 
 def excepthook(exctype, value, tb):
     sys.excepthook = sys.__excepthook__
