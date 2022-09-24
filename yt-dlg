@@ -83,7 +83,7 @@ class Terminal(Vte.Terminal):
 
     def recv_url(self, url):
         self.url = url
-        self.feed(b'\33[H\33[J\33[?25h')
+        self.feed(b'\33[G\33[K\33[?25h')
         cmd = ['yt-dlp', '--', self.url]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT,
