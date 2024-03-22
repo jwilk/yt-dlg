@@ -61,7 +61,11 @@ class Terminal(Vte.Terminal):
         super().__init__()
         self.url = None
         self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        self.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self.drag_dest_set(
+            flags=Gtk.DestDefaults.ALL,
+            targets=[],
+            actions=Gdk.DragAction.COPY
+        )
         self.connect('drag-data-received', self.on_drag_data_received)
         self.connect('child-exited', self.on_child_exited)
         self.feed(self.prompt)
