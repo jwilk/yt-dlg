@@ -39,10 +39,10 @@ class Window(Gtk.Window):
         self.add(hbox)
         accel = Gtk.AccelGroup()
         accel.connect(
-            Gdk.keyval_from_name('v'),
-            Gdk.ModifierType.CONTROL_MASK,
-            0,
-            self.term.on_accel
+            accel_key=Gdk.keyval_from_name('v'),
+            accel_mods=Gdk.ModifierType.CONTROL_MASK,
+            accel_flags=0,
+            closure=self.term.on_accel
         )
         self.add_accel_group(accel)
         self.connect('destroy', Gtk.main_quit)
