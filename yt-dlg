@@ -101,7 +101,6 @@ class Terminal(Vte.Terminal):
             None, # child_setup
             None, # child_setup_data
             -1, # timeout
-            None, # cancellable
         )
 
     def on_child_exited(self, widget, exit_status):
