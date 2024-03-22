@@ -93,12 +93,15 @@ class Terminal(Vte.Terminal):
         self.feed(b'\33[G\33[K\33[?25h')
         cmd = ['yt-dlp', '--', self.url]
         self.spawn_async(
-            Vte.PtyFlags.DEFAULT,
-            get_dl_dir(),
-            cmd,
-            None,
-            GLib.SpawnFlags.DEFAULT,
-            None, None, -1, None
+            Vte.PtyFlags.DEFAULT, # pty_flags
+            get_dl_dir(), # working_directory
+            cmd, # argv
+            None, # envv
+            GLib.SpawnFlags.DEFAULT, # spawn_flags
+            None, # child_setup
+            None, # child_setup_data
+            -1, # timeout
+            None, # cancellable
         )
 
     def on_child_exited(self, widget, exit_status):
