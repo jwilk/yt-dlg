@@ -52,8 +52,8 @@ class Window(Gtk.Window):
 def get_dl_dir():
     return GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD)
 
-def is_url(text):
-    return re.match('^https?://', text) is not None
+def get_urls(text):
+    return re.findall(r'^https?://\S+', text, flags=re.M)
 
 class Terminal(Vte.Terminal):
 
@@ -61,7 +61,7 @@ class Terminal(Vte.Terminal):
 
     def __init__(self):
         super().__init__()
-        self.url = None
+        self.urls = None
         self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.drag_dest_set(
             flags=Gtk.DestDefaults.ALL,
@@ -73,27 +73,29 @@ class Terminal(Vte.Terminal):
         self.feed(self.prompt)
 
     def on_accel(self, group, window, key, mod):
-        if self.url is not None:
+        if self.urls:
             return
         assert key == Gdk.keyval_from_name('v')
         assert mod == Gdk.ModifierType.CONTROL_MASK
         text = self.clipboard.wait_for_text()
-        if not is_url(text):
+        urls = get_urls(text)
+        if not urls:
             return
-        self.recv_url(text)
+        self.recv_urls(urls)
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
-        if self.url is not None:
+        if self.urls:
             return
         text = data.get_text()
-        if not is_url(text):
+        urls = get_urls(text)
+        if not urls:
             return
-        self.recv_url(text)
+        self.recv_urls(urls)
 
-    def recv_url(self, url):
-        self.url = url
+    def recv_urls(self, urls):
+        self.urls = urls
         self.feed(b'\33[G\33[K\33[?25h')
-        cmd = ['yt-dlp', '--', self.url]
+        cmd = ['yt-dlp', '--', *urls]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT, # pty_flags
             get_dl_dir(), # working_directory
@@ -108,7 +110,7 @@ class Terminal(Vte.Terminal):
     def on_child_exited(self, widget, exit_status):
         self.feed(b'\r\n')
         self.feed(self.prompt)
-        self.url = None
+        self.urls = None
 
 def excepthook(exctype, value, tb):
     sys.excepthook = sys.__excepthook__
