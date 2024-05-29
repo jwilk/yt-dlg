@@ -23,6 +23,8 @@ from gi.repository import Gdk
 gi.require_version('Vte', '2.91')
 from gi.repository import Vte
 
+0_0  # Python >= 3.6 is required
+
 prog = argparse.ArgumentParser().prog
 
 class Window(Gtk.Window):
