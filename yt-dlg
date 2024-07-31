@@ -80,9 +80,7 @@ class Terminal(Vte.Terminal):
             return
         assert key == Gdk.keyval_from_name('v')
         assert mod == Gdk.ModifierType.CONTROL_MASK
-        text = self.clipboard.wait_for_text()
-        if not text:
-            return
+        text = self.clipboard.wait_for_text() or ''
         urls = get_urls(text)
         if not urls:
             return
