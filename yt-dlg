@@ -55,6 +55,9 @@ def get_dl_dir():
 def get_urls(text):
     return re.findall(r'^https?://\S+', text, flags=re.M)
 
+def deduplicate(lst):
+    return list({elt: 0 for elt in lst}.keys())
+
 class Terminal(Vte.Terminal):
 
     prompt = b'[drag & drop URL here; or paste URL with Ctrl-V]\33[?25l'
@@ -95,6 +98,7 @@ class Terminal(Vte.Terminal):
         self.recv_urls(urls)
 
     def recv_urls(self, urls):
+        urls = deduplicate(urls)
         self.urls = urls
         self.feed(b'\33[G\33[K\33[?25h')
         cmd = ['yt-dlp', '--', *urls]
