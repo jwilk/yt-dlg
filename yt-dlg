@@ -5,7 +5,9 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
+import html.parser
 import re
+import subprocess
 import sys
 import traceback
 
@@ -58,6 +60,42 @@ def get_urls(text):
 def deduplicate(lst):
     return list({elt: 0 for elt in lst}.keys())
 
+def xclip_html():
+    # FIXME: use the GTK API instead
+    # https://bugs.debian.org/1077677 ("Python Gtk.Clipboard.request_rich_text() crashes")
+    cmdline = 'xclip -o -selection clipboard -target text/html'
+    cmdline = cmdline.split()
+    proc = subprocess.run(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode != 0:
+        return
+    return proc.stdout
+
+class HTMLParser(html.parser.HTMLParser):
+
+    def __init__(self):
+        super().__init__()
+        self.y_urls = []
+
+    def handle_starttag(self, tag, attrs):
+        url = dict(attrs).get('href', '')
+        if re.fullmatch('https?://\S+', url):
+            self.y_urls += [url]
+
+    if sys.version_info < (3, 10):
+        # https://bugs.python.org/issue31844
+        def error(self, message):
+            # hopefully not reachable
+            raise RuntimeError(message)
+
+def get_html_urls(data):
+    if isinstance(data, bytes):
+        # eww, FIXME
+        data = data.decode('ASCII', 'replace')
+    parser = HTMLParser()
+    parser.feed(data)
+    parser.close()
+    return parser.y_urls
+
 class Terminal(Vte.Terminal):
 
     prompt = (
@@ -85,6 +123,8 @@ class Terminal(Vte.Terminal):
         assert mod == Gdk.ModifierType.CONTROL_MASK
         text = self.clipboard.wait_for_text() or ''
         urls = get_urls(text)
+        html_content = xclip_html() or ''
+        urls += get_html_urls(html_content)
         if not urls:
             return
         self.recv_urls(urls)
