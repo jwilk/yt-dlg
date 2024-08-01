@@ -60,7 +60,10 @@ def deduplicate(lst):
 
 class Terminal(Vte.Terminal):
 
-    prompt = b'[drag & drop URL here; or paste URL with Ctrl-V]\33[?25l'
+    prompt = (
+        b'[drag & drop URL here; or paste URL with Ctrl-V]'
+        b'\33[?25l'  # hide cursor
+    )
 
     def __init__(self):
         super().__init__()
@@ -98,7 +101,11 @@ class Terminal(Vte.Terminal):
     def recv_urls(self, urls):
         urls = deduplicate(urls)
         self.urls = urls
-        self.feed(b'\33[G\33[K\33[?25h')
+        self.feed(
+            b'\33[G'  # go to start of line
+            b'\33[K'  # erase line
+            b'\33[?25h'  # show cursor
+        )
         cmd = ['yt-dlp', '--', *urls]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT, # pty_flags
