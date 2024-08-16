@@ -60,16 +60,6 @@ def get_urls(text):
 def deduplicate(lst):
     return list({elt: 0 for elt in lst}.keys())
 
-def xclip_html():
-    # FIXME: use the GTK API instead
-    # https://bugs.debian.org/1077677 ("Python Gtk.Clipboard.request_rich_text() crashes")
-    cmdline = 'xclip -o -selection clipboard -target text/html'
-    cmdline = cmdline.split()
-    proc = subprocess.run(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if proc.returncode != 0:
-        return
-    return proc.stdout
-
 class HTMLParser(html.parser.HTMLParser):
 
     def __init__(self):
@@ -123,7 +113,9 @@ class Terminal(Vte.Terminal):
         assert mod == Gdk.ModifierType.CONTROL_MASK
         text = self.clipboard.wait_for_text() or ''
         urls = get_urls(text)
-        html_content = xclip_html() or ''
+        a_text_html = Gdk.Atom.intern('text/html', False)
+        selection = self.clipboard.wait_for_contents(a_text_html)
+        html_content = selection.get_data()
         urls += get_html_urls(html_content)
         if not urls:
             return
