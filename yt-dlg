@@ -89,7 +89,7 @@ def get_html_urls(data):
 class Terminal(Vte.Terminal):
 
     prompt = (
-        b'[drag & drop URL here; or paste URL with Ctrl-V]'
+        b'[drag & drop URL here; or paste URLs with Ctrl-V]'
         b'\33[?25l'  # hide cursor
     )
 
