@@ -115,8 +115,9 @@ class Terminal(Vte.Terminal):
         urls = get_urls(text)
         a_text_html = Gdk.Atom.intern('text/html', False)
         selection = self.clipboard.wait_for_contents(a_text_html)
-        html_content = selection.get_data()
-        urls += get_html_urls(html_content)
+        if selection:
+            html_content = selection.get_data()
+            urls += get_html_urls(html_content)
         if not urls:
             return
         self.recv_urls(urls)
