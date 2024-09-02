@@ -93,6 +93,12 @@ class Terminal(Vte.Terminal):
         b'\33[?25l'  # hide cursor
     )
 
+    unprompt = (
+        b'\33[G'  # go to start of line
+        b'\33[K'  # erase line
+        b'\33[?25h'  # show cursor
+    )
+
     def __init__(self):
         super().__init__()
         self.urls = None
@@ -134,11 +140,7 @@ class Terminal(Vte.Terminal):
     def recv_urls(self, urls):
         urls = deduplicate(urls)
         self.urls = urls
-        self.feed(
-            b'\33[G'  # go to start of line
-            b'\33[K'  # erase line
-            b'\33[?25h'  # show cursor
-        )
+        self.feed(self.unprompt)
         cmd = ['yt-dlp', '--', *urls]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT, # pty_flags
