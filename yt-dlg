@@ -68,7 +68,7 @@ class HTMLParser(html.parser.HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         url = dict(attrs).get('href', '')
-        if re.fullmatch('https?://\S+', url):
+        if re.fullmatch(r'https?://\S+', url):
             self.y_urls += [url]
 
     if sys.version_info < (3, 10):
