@@ -6,6 +6,7 @@
 
 import argparse
 import html.parser
+import os
 import re
 import sys
 import traceback
@@ -52,6 +53,14 @@ class Window(Gtk.Window):
 
 def get_dl_dir():
     return GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD)
+
+def make_tmp_dl_dir(dl_dir):
+    tmp_dir = f'{dl_dir}/.yt-dlp-tmp'
+    try:
+        os.mkdir(tmp_dir, mode=0o700)
+    except FileExistsError:
+        pass
+    return tmp_dir
 
 def get_urls(text):
     return re.findall(r'^https?://\S+', text, flags=re.M)
@@ -140,7 +149,9 @@ class Terminal(Vte.Terminal):
         urls = deduplicate(urls)
         self.urls = urls
         self.feed(self.unprompt)
-        cmd = ['yt-dlp', '--', *urls]
+        dl_dir = get_dl_dir()
+        tmp_dl_dir = make_tmp_dl_dir(dl_dir)
+        cmd = ['yt-dlp', '-P', f'temp:{tmp_dl_dir}', '--', *urls]
         self.spawn_async(
             Vte.PtyFlags.DEFAULT, # pty_flags
             get_dl_dir(), # working_directory
